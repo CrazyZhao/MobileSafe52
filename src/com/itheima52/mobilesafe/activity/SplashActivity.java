@@ -149,7 +149,7 @@ public class SplashActivity extends Activity {
 				HttpURLConnection connection = null;
 				try {
 					//本机地址用localhost，但是如果用模拟器加载本机地址时，可以用（10.0.2.2）来替换
-					URL url = new URL("http://10.37.0.6:8080/update.json");
+					URL url = new URL("http://10.0.2.2:8080/update.json");
 					connection = (HttpURLConnection)url.openConnection();
 					connection.setRequestMethod("GET");
 					connection.setConnectTimeout(5000);
