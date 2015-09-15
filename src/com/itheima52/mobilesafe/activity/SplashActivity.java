@@ -1,5 +1,6 @@
 package com.itheima52.mobilesafe.activity;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -12,19 +13,27 @@ import org.json.JSONObject;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.itheima52.mobilesafe.R;
 import com.itheima52.mobilesafe.utils.StreamUtils;
+import com.lidroid.xutils.HttpUtils;
+import com.lidroid.xutils.exception.HttpException;
+import com.lidroid.xutils.http.ResponseInfo;
+import com.lidroid.xutils.http.callback.RequestCallBack;
 
 public class SplashActivity extends Activity {
 
@@ -39,6 +48,8 @@ public class SplashActivity extends Activity {
 	protected static final int CODE_ENTER_HOME = 4;
 
 	private TextView tvVersion;
+	
+	private TextView tvProgress;//下载进度展示
 	
 	//服务器返回的信息
 	private String mVersionName;//版本名
@@ -80,7 +91,7 @@ public class SplashActivity extends Activity {
 		setContentView(R.layout.activity_splash);
 		tvVersion = (TextView)findViewById(R.id.tv_version);
 		tvVersion.setText("版本号："+getVersionName());
-		
+		tvProgress = (TextView) findViewById(R.id.tv_progress);//默认隐藏
 		checkVersion();
 	}
 	
@@ -217,6 +228,7 @@ public class SplashActivity extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
 				// TODO Auto-generated method stub
+				downLoad();
 				System.out.println("立即更新");
 			}
 		});
@@ -228,9 +240,70 @@ public class SplashActivity extends Activity {
 				enterHome();
 			}
 		});
+		//设置取消的监听，用户点击返回键时会触发
+		builder.setOnCancelListener(new OnCancelListener() {
+			
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				// TODO Auto-generated method stub
+				enterHome();
+			}
+		});
 		builder.show();
 	}
+	/**
+	 * 点击下载
+	 */
+	protected void downLoad() {
+		// TODO Auto-generated method stub
+		if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+			
+			tvProgress.setVisibility(View.VISIBLE);//显示进度
+			String target = Environment.getExternalStorageDirectory()+"/update.apk";
+			HttpUtils utils = new HttpUtils();
+			System.out.println(mUrl);
+			utils.download(mUrl, target, new RequestCallBack<File>() {
+				//文件的下载进度
+				@Override
+				public void onLoading(long total, long current,
+						boolean isUploading) {
+					// TODO Auto-generated method stub
+					super.onLoading(total, current, isUploading);
+				//	System.out.println("下载进度:" + current + "/" + total);
+					tvProgress.setText("下载进度" + current * 100 / total + "%");
+					
+				}
+				@Override
+				public void onSuccess(ResponseInfo<File> arg0) {
+					//跳转到系统下载页面
+					Intent intent = new Intent(Intent.ACTION_VIEW);
+					intent.addCategory(intent.CATEGORY_DEFAULT);
+					intent.setDataAndType(Uri.fromFile(arg0.result), "application/vnd.android.package-archive");
+				//	startActivity(intent);
+					startActivityForResult(intent, 0);//如果用户取消安装，会返回结果，会回调方法onActivityResult方法
+				}
+				
+				@Override
+				public void onFailure(HttpException arg0, String arg1) {
+					// TODO Auto-generated method stub
+					Toast.makeText(SplashActivity.this, "下载失败!", Toast.LENGTH_SHORT).show();
+				}
+			});
+		}else{
+			Toast.makeText(SplashActivity.this, "找不到sdcard!", Toast.LENGTH_SHORT).show();
+		}
+		
+	}
 	
+	//如果用户取消安装，会返回结果，会回调方法onActivityResult方法
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		// TODO Auto-generated method stub
+		super.onActivityResult(requestCode, resultCode, data);
+		enterHome();
+	}
+
+
 	/**
 	 * 进入主页面
 	 */
