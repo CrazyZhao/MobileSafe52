@@ -2,4 +2,5 @@
 <resources>
     <color name="black">#000</color>
     <color name="浅绿色">#8866ff00</color>
+    <color name="灰色">#a000</color>
 </resources>

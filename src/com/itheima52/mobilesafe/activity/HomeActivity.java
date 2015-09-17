@@ -1,32 +1,44 @@
 package com.itheima52.mobilesafe.activity;
 
-
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.itheima52.mobilesafe.R;
 
 /**
  * 主页面
+ * 
  * @author baoliang.zhao
- *
+ * 
  */
 public class HomeActivity extends Activity {
 
 	private GridView gvHome;
-	
-	private String[] mItems = new String[]{"手机防盗","通讯卫士","软件管理","进程管理","流量统计","手机杀毒",
-			"缓存清理","高级工具","设置中心"};
-	
-	private int [] mPics = new int[]{R.drawable.home_safe,R.drawable.home_callmsgsafe,
-			R.drawable.home_apps,R.drawable.home_taskmanager,R.drawable.home_netmanager,
-			R.drawable.home_trojan,R.drawable.home_sysoptimize,R.drawable.home_tools,R.drawable.home_settings};
+
+	private String[] mItems = new String[] { "手机防盗", "通讯卫士", "软件管理", "进程管理",
+			"流量统计", "手机杀毒", "缓存清理", "高级工具", "设置中心" };
+
+	private int[] mPics = new int[] { R.drawable.home_safe,
+			R.drawable.home_callmsgsafe, R.drawable.home_apps,
+			R.drawable.home_taskmanager, R.drawable.home_netmanager,
+			R.drawable.home_trojan, R.drawable.home_sysoptimize,
+			R.drawable.home_tools, R.drawable.home_settings };
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
@@ -34,8 +46,89 @@ public class HomeActivity extends Activity {
 		setContentView(R.layout.activity_home);
 		gvHome = (GridView) findViewById(R.id.gv_home);
 		gvHome.setAdapter(new HomeAdapter());
+		gvHome.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view,
+					int position, long id) {
+				switch (position) {
+				case 8:
+					// 设置中心
+					startActivity(new Intent(HomeActivity.this,
+							SettingActivity.class));
+					break;
+				case 0:
+					// 手机防盗
+					showPasswordDialog();
+				default:
+					break;
+				}
+			}
+		});
 	}
-	
+
+	/**
+	 * 显示密码弹窗
+	 */
+	protected void showPasswordDialog() {
+		// 判断是否设置密码
+		// 如果没有设置过，弹出设置密码的弹窗
+		showPasswordSetDialog();
+
+	}
+
+	/**
+	 * 设置密码的弹窗
+	 */
+	private void showPasswordSetDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final AlertDialog dialog = builder.create();
+		View view = View.inflate(this, R.layout.dialog_set_password, null);
+		dialog.setView(view);// 将自定义的布局文件设置给dialog
+		dialog.setView(view, 0, 0, 0, 0);// 设置弹窗的边距为零，保证在2.X版本上运行没问题
+		dialog.show();
+
+		final EditText etPassword = (EditText) view
+				.findViewById(R.id.et_password);
+		final EditText etPasswordConfirm = (EditText) view
+				.findViewById(R.id.et_password_confirm);
+
+		Button btnOK = (Button) view.findViewById(R.id.btn_ok);
+		Button btnCancel = (Button) view.findViewById(R.id.btn_cancel);
+
+		btnOK.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				String password = etPassword.getText().toString();
+				String passwordConfirm = etPasswordConfirm.getText().toString();
+
+				if (!TextUtils.isEmpty(password)
+						&& !TextUtils.isEmpty(passwordConfirm)) {
+					if (password.equals(passwordConfirm)) {
+						Toast.makeText(HomeActivity.this, "登录成功！",
+								Toast.LENGTH_SHORT).show();
+						dialog.dismiss();
+					} else {
+						Toast.makeText(HomeActivity.this, "两次密码不一致！",
+								Toast.LENGTH_SHORT).show();
+
+					}
+				} else {
+					Toast.makeText(HomeActivity.this, "输入内容不能为空！",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
+		btnCancel.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
+	}
+
 	class HomeAdapter extends BaseAdapter {
 
 		@Override
@@ -59,14 +152,15 @@ public class HomeActivity extends Activity {
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			// TODO Auto-generated method stub
-			View view = View.inflate(HomeActivity.this, R.layout.home_list_item, null);
+			View view = View.inflate(HomeActivity.this,
+					R.layout.home_list_item, null);
 			ImageView ivItem = (ImageView) view.findViewById(R.id.iv_item);
 			TextView tvItem = (TextView) view.findViewById(R.id.tv_item);
-			
+
 			tvItem.setText(mItems[position]);
 			ivItem.setImageResource(mPics[position]);
 			return view;
 		}
-		
+
 	}
 }

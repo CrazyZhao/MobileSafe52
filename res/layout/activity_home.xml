@@ -5,35 +5,29 @@
     android:orientation="vertical" >
 
     <TextView
-        android:id="@+id/textView1"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:textColor="@color/black"
-        android:background="@color/浅绿色"
-        android:textSize="22sp"
-        android:gravity="center"
+        style="@style/TitleStyle"
         android:text="功能列表" />
-    
-    <TextView 
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="@color/black"
-        android:textSize="18sp"
-        android:text="有了手机卫士，腰不酸了，腿不疼了，走路也有劲了，手机卫士太牛逼了！"
-        android:singleLine="true"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp"
         android:ellipsize="marquee"
         android:focusable="true"
         android:focusableInTouchMode="true"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"/>
-    
-    <GridView 
+        android:singleLine="true"
+        android:text="有了手机卫士，腰不酸了，腿不疼了，走路也有劲了，手机卫士太牛逼了！"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <GridView
         android:id="@+id/gv_home"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:verticalSpacing="20dp"
         android:numColumns="3"
-        ></GridView>
+        android:verticalSpacing="20dp" >
+    </GridView>
 
 </LinearLayout>
