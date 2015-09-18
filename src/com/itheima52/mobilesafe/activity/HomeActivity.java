@@ -3,6 +3,7 @@ package com.itheima52.mobilesafe.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.itheima52.mobilesafe.R;
+import com.itheima52.mobilesafe.utils.MD5Utils;
 
 /**
  * 主页面
@@ -39,11 +41,18 @@ public class HomeActivity extends Activity {
 			R.drawable.home_trojan, R.drawable.home_sysoptimize,
 			R.drawable.home_tools, R.drawable.home_settings };
 
+	private SharedPreferences mPref;
+
+	private String savedPassword; //保存的密码
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_home);
+
+		mPref = getSharedPreferences("config", MODE_PRIVATE);
+
 		gvHome = (GridView) findViewById(R.id.gv_home);
 		gvHome.setAdapter(new HomeAdapter());
 		gvHome.setOnItemClickListener(new OnItemClickListener() {
@@ -71,10 +80,64 @@ public class HomeActivity extends Activity {
 	 * 显示密码弹窗
 	 */
 	protected void showPasswordDialog() {
-		// 判断是否设置密码
-		// 如果没有设置过，弹出设置密码的弹窗
-		showPasswordSetDialog();
+		savedPassword = mPref.getString("password", null);
+		if (!TextUtils.isEmpty(savedPassword)) {
+			// 如果设置过密码，弹出输入密码的弹窗
+			showPasswordInputDialog();
+		} else {
+			// 如果没有设置过，弹出设置密码的弹窗
+			showPasswordSetDialog();
+		}
+	}
 
+	/**
+	 * 输入密码弹窗
+	 */
+	private void showPasswordInputDialog() {
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		final AlertDialog dialog = builder.create();
+		View view = View.inflate(this, R.layout.dialog_input_password, null);
+		dialog.setView(view);// 将自定义的布局文件设置给dialog
+		dialog.setView(view, 0, 0, 0, 0);// 设置弹窗的边距为零，保证在2.X版本上运行没问题
+		dialog.show();
+
+		final EditText etPassword = (EditText) view
+				.findViewById(R.id.et_password);
+
+		Button btnOK = (Button) view.findViewById(R.id.btn_ok);
+		Button btnCancel = (Button) view.findViewById(R.id.btn_cancel);
+
+		btnOK.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				String password = etPassword.getText().toString();
+
+				if (!TextUtils.isEmpty(password)) {
+					if (MD5Utils.encode(password).equals(savedPassword)) {
+//						Toast.makeText(HomeActivity.this, "登录成功！",
+//								Toast.LENGTH_SHORT).show();
+						dialog.dismiss();
+						//跳转到手机防盗页面
+						startActivity(new Intent(HomeActivity.this, LostFindActivity.class));
+						
+					} else {
+						Toast.makeText(HomeActivity.this, "密码错误！",
+								Toast.LENGTH_SHORT).show();
+					}
+				} else {
+					Toast.makeText(HomeActivity.this, "输入内容不能为空！",
+							Toast.LENGTH_SHORT).show();
+				}
+			}
+		});
+		btnCancel.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				dialog.dismiss();
+			}
+		});
 	}
 
 	/**
@@ -106,9 +169,15 @@ public class HomeActivity extends Activity {
 				if (!TextUtils.isEmpty(password)
 						&& !TextUtils.isEmpty(passwordConfirm)) {
 					if (password.equals(passwordConfirm)) {
-						Toast.makeText(HomeActivity.this, "登录成功！",
-								Toast.LENGTH_SHORT).show();
+//						Toast.makeText(HomeActivity.this, "登录成功！",
+//								Toast.LENGTH_SHORT).show();
+						// 将密码存到SharedPreferenced中
+						mPref.edit().putString("password", MD5Utils.encode(password)).commit();
+
 						dialog.dismiss();
+						
+						//跳转到手机防盗页面
+						startActivity(new Intent(HomeActivity.this, LostFindActivity.class));
 					} else {
 						Toast.makeText(HomeActivity.this, "两次密码不一致！",
 								Toast.LENGTH_SHORT).show();
