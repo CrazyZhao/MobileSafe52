@@ -1,11 +1,12 @@
 package com.itheima52.mobilesafe.activity;
 
-import com.itheima52.mobilesafe.R;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
+
+import com.itheima52.mobilesafe.R;
 
 /**
  * 手机防盗页面
@@ -35,4 +36,13 @@ public class LostFindActivity extends Activity {
 		}
 
 	}
+
+	/*
+	 * 重新进入设置向导点击事件
+	 */
+	public void reEnter(View view) {
+		startActivity(new Intent(this, Setup1Activity.class));
+		finish();
+	}
+
 }

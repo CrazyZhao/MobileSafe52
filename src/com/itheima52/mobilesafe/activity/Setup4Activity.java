@@ -14,31 +14,33 @@ import com.itheima52.mobilesafe.R;
  * @author baoliang.zhao
  * 
  */
-public class Setup4Activity extends Activity {
-
-	private SharedPreferences mPref;
+public class Setup4Activity extends BaseSetupActivity {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_setup4);
-		
-		mPref = getSharedPreferences("config", MODE_PRIVATE);
+
 	}
 
-	// 下一页
-	public void next(View view) {
+	@Override
+	public void showNextPage() {
 		startActivity(new Intent(this, LostFindActivity.class));
 		finish();
-		
-		mPref.edit().putBoolean("configed", true).commit();//更新sp，设置为true,表示已经设置过向导了
+		// 两个界面切换的动画
+		overridePendingTransition(R.anim.tran_in, R.anim.tran_out);// 进入动画和退出动画
+
+		mPref.edit().putBoolean("configed", true).commit();// 更新sp，设置为true,表示已经设置过向导了
 	}
 
-	// 上一页
-	public void previous(View view) {
+	@Override
+	public void showPreviousPage() {
 		startActivity(new Intent(this, Setup3Activity.class));
 		finish();
+		// 两个界面切换的动画
+		overridePendingTransition(R.anim.tran_previous_in,
+				R.anim.tran_previous_out);// 进入动画和退出动画
 	}
 
 }
