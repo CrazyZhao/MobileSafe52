@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 
 import com.itheima52.mobilesafe.R;
+import com.itheima52.mobilesafe.utils.ToastUtils;
 import com.itheima52.mobilesafe.view.SettingItemView;
 
 /**
@@ -59,6 +60,13 @@ public class Setup2Activity extends BaseSetupActivity {
 
 	@Override
 	public void showNextPage() {
+		// 如果SIM卡没有绑定，不允许进入下一个页面
+		String sim = mPref.getString("sim", null);
+		if (TextUtils.isEmpty(sim)) {
+			ToastUtils.showToast(this, "SIM卡没有绑定！");
+			return;
+		}
+
 		startActivity(new Intent(this, Setup3Activity.class));
 		finish();
 		// 两个界面切换的动画

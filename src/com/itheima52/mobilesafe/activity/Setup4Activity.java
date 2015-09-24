@@ -1,10 +1,10 @@
 package com.itheima52.mobilesafe.activity;
 
-import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 
 import com.itheima52.mobilesafe.R;
 
@@ -16,11 +16,39 @@ import com.itheima52.mobilesafe.R;
  */
 public class Setup4Activity extends BaseSetupActivity {
 
+	private CheckBox cbProtect;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		// TODO Auto-generated method stub
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_setup4);
+
+		cbProtect = (CheckBox) findViewById(R.id.cb_protect);
+
+		//根据sp保存的状态更新保护状态
+		boolean protect = mPref.getBoolean("protect", false);
+		if (protect) {
+			cbProtect.setText("防盗保护已经开启");
+			cbProtect.setChecked(true);
+		} else {
+			cbProtect.setText("防盗保护没有开启");
+			cbProtect.setChecked(false);
+		}
+		cbProtect.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+
+			@Override
+			public void onCheckedChanged(CompoundButton buttonView,
+					boolean isChecked) {
+				if (isChecked) {
+					cbProtect.setText("防盗保护已经开启");
+					mPref.edit().putBoolean("protect", true).commit();
+				} else {
+					cbProtect.setText("防盗保护没有开启");
+					mPref.edit().putBoolean("protect", false).commit();
+				}
+			}
+		});
 
 	}
 
