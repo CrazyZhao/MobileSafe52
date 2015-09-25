@@ -43,7 +43,7 @@ public class HomeActivity extends Activity {
 
 	private SharedPreferences mPref;
 
-	private String savedPassword; //保存的密码
+	private String savedPassword; // 保存的密码
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +65,11 @@ public class HomeActivity extends Activity {
 					// 设置中心
 					startActivity(new Intent(HomeActivity.this,
 							SettingActivity.class));
+					break;
+				case 7:
+					// 高级工具
+					startActivity(new Intent(HomeActivity.this,
+							AToolsActivity.class));
 					break;
 				case 0:
 					// 手机防盗
@@ -115,12 +120,13 @@ public class HomeActivity extends Activity {
 
 				if (!TextUtils.isEmpty(password)) {
 					if (MD5Utils.encode(password).equals(savedPassword)) {
-//						Toast.makeText(HomeActivity.this, "登录成功！",
-//								Toast.LENGTH_SHORT).show();
+						// Toast.makeText(HomeActivity.this, "登录成功！",
+						// Toast.LENGTH_SHORT).show();
 						dialog.dismiss();
-						//跳转到手机防盗页面
-						startActivity(new Intent(HomeActivity.this, LostFindActivity.class));
-						
+						// 跳转到手机防盗页面
+						startActivity(new Intent(HomeActivity.this,
+								LostFindActivity.class));
+
 					} else {
 						Toast.makeText(HomeActivity.this, "密码错误！",
 								Toast.LENGTH_SHORT).show();
@@ -169,15 +175,18 @@ public class HomeActivity extends Activity {
 				if (!TextUtils.isEmpty(password)
 						&& !TextUtils.isEmpty(passwordConfirm)) {
 					if (password.equals(passwordConfirm)) {
-//						Toast.makeText(HomeActivity.this, "登录成功！",
-//								Toast.LENGTH_SHORT).show();
+						// Toast.makeText(HomeActivity.this, "登录成功！",
+						// Toast.LENGTH_SHORT).show();
 						// 将密码存到SharedPreferenced中
-						mPref.edit().putString("password", MD5Utils.encode(password)).commit();
+						mPref.edit()
+								.putString("password",
+										MD5Utils.encode(password)).commit();
 
 						dialog.dismiss();
-						
-						//跳转到手机防盗页面
-						startActivity(new Intent(HomeActivity.this, LostFindActivity.class));
+
+						// 跳转到手机防盗页面
+						startActivity(new Intent(HomeActivity.this,
+								LostFindActivity.class));
 					} else {
 						Toast.makeText(HomeActivity.this, "两次密码不一致！",
 								Toast.LENGTH_SHORT).show();

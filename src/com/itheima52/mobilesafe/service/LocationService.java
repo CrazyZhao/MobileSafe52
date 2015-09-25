@@ -41,7 +41,7 @@ public class LocationService extends Service {
 		String bestProvider = lm.getBestProvider(criteria, true);// 获取最佳位置提供者
 
 		listener = new MyLocationListener();
-		lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, listener);// 参1表示位置提供者,参2表示最短更新时间,参3表示最短更新距离
+		lm.requestLocationUpdates(bestProvider, 0, 0, listener);// 参1表示位置提供者,参2表示最短更新时间,参3表示最短更新距离
 	}
 
 	class MyLocationListener implements LocationListener {
