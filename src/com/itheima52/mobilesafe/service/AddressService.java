@@ -6,12 +6,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.graphics.Color;
+import android.content.SharedPreferences.Editor;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -32,6 +35,11 @@ public class AddressService extends Service {
 	private WindowManager mWM;
 	private View view;
 	private SharedPreferences mPref;
+	protected int startX;
+	protected int startY;
+	private WindowManager.LayoutParams params;
+	private int winWidth;
+	private int winHeight;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -105,20 +113,30 @@ public class AddressService extends Service {
 	}
 
 	/**
-	 * 自定义归属地浮窗
+	 * 自定义归属地浮窗 需要权限android.permission.SYSTEM_ALERT_WINDOW
 	 */
 	private void showToast(String text) {
 		mWM = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+		// 获取屏幕宽度和高度
+		winWidth = mWM.getDefaultDisplay().getWidth();
+		winHeight = mWM.getDefaultDisplay().getHeight();
 
-		WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+		params = new WindowManager.LayoutParams();
 		params.height = WindowManager.LayoutParams.WRAP_CONTENT;
 		params.width = WindowManager.LayoutParams.WRAP_CONTENT;
 		params.format = PixelFormat.TRANSLUCENT;
-		params.type = WindowManager.LayoutParams.TYPE_TOAST;
+		params.type = WindowManager.LayoutParams.TYPE_PHONE;//需要权限android.permission.SYSTEM_ALERT_WINDOW
 		params.setTitle("Toast");
+		params.gravity = Gravity.LEFT + Gravity.TOP;// 将重心位置设置为左上方(0,0),而不是默认的中心位置
 		params.flags = WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-				| WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-				| WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+				| WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
+
+		int lastX = mPref.getInt("lastX", 0);
+		int lastY = mPref.getInt("lastY", 0);
+		// 设置浮窗的位置：基于左上方的偏移量
+		params.x = lastX;
+		params.y = lastY;
+
 		// view = new TextView(this);
 		view = View.inflate(this, R.layout.toast_address, null);
 
@@ -127,10 +145,63 @@ public class AddressService extends Service {
 				R.drawable.call_locate_gray, R.drawable.call_locate_green };
 		int style = mPref.getInt("address_style", 0);// 读取保存的
 
-		view.setBackgroundResource(bgs[style]);//根据存储的样式更新提示框风格
+		view.setBackgroundResource(bgs[style]);// 根据存储的样式更新提示框风格
 		TextView tvText = (TextView) view.findViewById(R.id.tv_number);
 		tvText.setText(text);
-		mWM.addView(view, params);// 将view添加到屏幕上：Window
+		mWM.addView(view, params);// 将view添加到屏幕上：Window、
+
+		view.setOnTouchListener(new OnTouchListener() {
+
+			@Override
+			public boolean onTouch(View v, MotionEvent event) {
+				switch (event.getAction()) {
+				case MotionEvent.ACTION_DOWN:
+					// 初始化起点坐标
+					startX = (int) event.getRawX();
+					startY = (int) event.getRawY();
+					break;
+				case MotionEvent.ACTION_MOVE:
+					int endX = (int) event.getRawX();
+					int endY = (int) event.getRawY();
+					// 计算移动偏移量
+					int dx = endX - startX;
+					int dy = endY - startY;
+					// 更新左上右下距离
+					params.x += dx;
+					params.y += dy;
+					//防止拖拽出屏幕边界
+					if (params.x < 0) {
+						params.x = 0;
+					}
+					if (params.y < 0) {
+						params.y = 0;
+					}
+					if (params.x > winWidth - view.getWidth()) {
+						params.x = winWidth - view.getWidth();
+					}
+					if (params.y > winHeight - view.getHeight()) {
+						params.y = winHeight - view.getHeight();
+					}
+
+					mWM.updateViewLayout(view, params);
+					// 重新初始化起点坐标
+					startX = (int) event.getRawX();
+					startY = (int) event.getRawY();
+					break;
+				case MotionEvent.ACTION_UP:
+					// 记录坐标点
+					Editor editor = mPref.edit();
+					editor.putInt("lastX", params.x);
+					editor.putInt("lastY", params.y);
+					editor.commit();
+					break;
+
+				default:
+					break;
+				}
+				return true;
+			}
+		});
 	}
 
 }
